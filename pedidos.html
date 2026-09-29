@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pork & Beef - Pedidos</title>
+    <style>
+        :root {
+            --primary: #ff9d00;
+            --secondary: #d35400;
+            --bg-dark: #121212;
+            --card-bg: #1e1e1e;
+            --card-border: #2c2c2c;
+            --text-main: #ffffff;
+            --text-muted: #a0a0a0;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg-dark); 
+            color: var(--text-main); 
+            margin: 0; 
+            padding: 15px; 
+            display: flex; 
+            justify-content: center; 
+        }
+
+        .container { 
+            width: 100%; 
+            max-width: 520px; 
+            background: #181818; 
+            padding: 22px; 
+            border-radius: 24px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); 
+            box-sizing: border-box; 
+        }
+
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animar { animation: aparecer 0.35s ease-out forwards; }
+
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 { color: var(--primary); font-size: 30px; font-weight: 800; margin: 0; letter-spacing: 0.5px; text-transform: uppercase; }
+        .header p { color: var(--text-muted); font-size: 15px; margin-top: 4px; }
+
+        .seccion { 
+            background: var(--card-bg); 
+            border-radius: 18px; 
+            padding: 18px; 
+            margin-bottom: 18px; 
+            border: 1px solid var(--card-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .seccion h3 { margin: 0 0 4px 0; font-size: 17px; color: var(--primary); }
+        .seccion h4 { margin: 12px 0 8px 0; font-size: 14px; color: #fff; border-bottom: 1px solid #2a2a2a; padding-bottom: 4px; }
+        .seccion p.desc { margin: 0 0 12px 0; font-size: 13px; color: var(--text-muted); }
+
+        .grid-opciones { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media (min-width: 400px) { .grid-opciones.dos-columnas { grid-template-columns: 1fr 1fr; } }
+
+        .opcion {
+            background: #252525; border: 1.5px solid #333; border-radius: 14px; padding: 12px 14px;
+            cursor: pointer; display: flex; align-items: center; transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .opcion:hover { background: #2d2d2d; border-color: var(--primary); }
+        .opcion input { margin-right: 10px; width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer; }
+        .opcion span { font-size: 14px; font-weight: 500; }
+
+        input[type="text"], select { 
+            width: 100%; padding: 14px 16px; margin-top: 8px; border-radius: 14px; 
+            border: 1.5px solid #333; background: #252525; color: white; font-size: 15px; box-sizing: border-box; 
+            appearance: none; 
+        }
+        
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff9d00' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 18px;
+            cursor: pointer;
+            padding-right: 40px;
+        }
+
+        input[type="text"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255, 157, 0, 0.2); }
+
+        button, .btn-whatsapp { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; font-weight: bold; 
+            border: none; padding: 16px; width: 100%; font-size: 16px; border-radius: 14px; cursor: pointer; 
+            margin-top: 10px; transition: all 0.25s ease; box-shadow: 0 6px 15px rgba(211, 84, 0, 0.3);
+            display: block; text-align: center; text-decoration: none; box-sizing: border-box;
+        }
+        button:hover, .btn-whatsapp:hover { transform: translateY(-1px); opacity: 0.95; }
+        .btn-secundario { background: #2a2a2a; color: #fff; margin-bottom: 12px; border: 1px solid #3a3a3a; box-shadow: none; }
+        .btn-whatsapp { background: #25D366; color: white; margin-top: 20px; font-size: 17px; box-shadow: 0 6px 15px rgba(37, 211, 102, 0.3); }
+
+        #pantalla-gracias { display: none; }
+        #pantalla-pedido { display: block; }
+        
+        .resumen-caja { background: var(--card-bg); border: 1px solid var(--card-border); padding: 18px; border-radius: 18px; font-size: 14px; margin-bottom: 20px; }
+        .total-destacado { font-size: 20px; color: var(--primary); text-align: right; margin-top: 15px; font-weight: bold; border-top: 1px solid #333; padding-top: 12px; }
+        #contador-carrito { background: rgba(37, 211, 102, 0.1); color: #25D366; border: 1px solid #25D366; padding: 12px; border-radius: 14px; text-align: center; margin-bottom: 18px; font-weight: bold; display: none; }
+
+        .acordeon-pedido { background: #252525; border-radius: 12px; margin-top: 10px; border: 1px solid #333; }
+        .acordeon-pedido summary { 
+            padding: 12px 15px; font-weight: bold; cursor: pointer; list-style: none; 
+            display: flex; justify-content: space-between; align-items: center; color: var(--primary);
+        }
+        .acordeon-pedido summary::-webkit-details-marker { display: none; }
+        .acordeon-pedido summary::after { content: '▼'; font-size: 11px; transition: transform 0.3s ease; color: var(--text-muted); }
+        .acordeon-pedido[open] summary::after { transform: rotate(180deg); }
+        .acordeon-detalle { padding: 0 15px 12px 15px; color: var(--text-main); font-size: 13px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+<div class="container animar" id="pantalla-pedido">
+    <div class="header">
+        <h1>Pork & Beef</h1>
+        <p>Sándwich de Bondiola a la Cerveza</p>
+    </div>
+    
+    <div id="contador-carrito">Tienes sándwiches en tu pedido.</div>
+
+    <div class="seccion" id="seccion-cliente">
+        <h3>Datos de Entrega</h3>
+        <p class="desc">¿A dónde enviamos tu pedido?</p>
+        <input type="text" id="nombreCliente" placeholder="Tu Nombre y Apellido">
+        <select id="localidadEnvio">
+            <option value="2000" data-nombre="San Fernando">San Fernando (Envío $2.000)</option>
+            <option value="3000" data-nombre="San Isidro">San Isidro (Envío $3.000)</option>
+            <option value="3000" data-nombre="Tigre">Tigre (Envío $3.000)</option>
+        </select>
+        <input type="text" id="direccionCliente" placeholder="Dirección completa (Calle y Número)">
+    </div>
+
+    <div class="seccion">
+        <h3>Elige tu Menú</h3>
+        <p class="desc">Selecciona tu opción o promoción preferida</p>
+        <div class="grid-opciones">
+            <label class="opcion"><input type="radio" name="tipoMenu" value="2x1 Con papas" data-precio="15000" checked onclick="actualizarMenu()"> <span>🔥 2 x 1 Con Papas ($15.000)</span></label>
+            <label class="opcion"><input type="radio" name="tipoMenu" value="2x1 Sin papas" data-precio="13000" onclick="actualizarMenu()"> <span>🥪 2 x 1 Sin Papas ($13.000)</span></label>
+            <label class="opcion"><input type="radio" name="tipoMenu" value="1 Sándwich Con papas" data-precio="10000" onclick="actualizarMenu()"> <span>🍟 1 Sándwich Con Papas ($10.000)</span></label>
+            <label class="opcion"><input type="radio" name="tipoMenu" value="1 Sándwich Sin papas" data-precio="8500" onclick="actualizarMenu()"> <span>🥖 1 Sándwich Sin Papas ($8.500)</span></label>
+        </div>
+    </div>
+
+    <div class="seccion" id="seccion-modo-armado">
+        <h3>Modalidad de Armado</h3>
+        <p class="desc">¿Cómo quieres armar tus 2 sándwiches?</p>
+        <div class="grid-opciones dos-columnas">
+            <label class="opcion"><input type="radio" name="modoArmado" value="iguales" checked onclick="cambiarModoArmado()"> <span>Ambos Iguales</span></label>
+            <label class="opcion"><input type="radio" name="modoArmado" value="diferentes" onclick="cambiarModoArmado()"> <span>Armar Diferentes</span></label>
+        </div>
+    </div>
+
+    <!-- BLOQUE: AMBOS IGUALES / INDIVIDUAL -->
+    <div id="bloque-iguales">
+        <div class="seccion">
+            <h3 id="titulo-veg">Vegetales (Ambos sándwiches)</h3>
+            <p class="desc">Marca lo que deseas quitar:</p>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="veg" value="Sin Zanahoria"> <span>Sin Zanahoria</span></label>
+                <label class="opcion"><input type="checkbox" name="veg" value="Sin Morrón"> <span>Sin Morrón</span></label>
+                <label class="opcion"><input type="checkbox" name="veg" value="Sin Cebolla"> <span>Sin Cebolla</span></label>
+            </div>
+        </div>
+
+        <div class="seccion">
+            <h3 id="titulo-salsas">Salsas (Ambos sándwiches)</h3>
+            <p class="desc">Elige los aderezos</p>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="salsa" value="Salsa Porkis"> <span>Salsa Porkis</span></label>
+                <label class="opcion"><input type="checkbox" name="salsa" value="Criolla"> <span>Salsa Criolla</span></label>
+                <label class="opcion"><input type="checkbox" name="salsa" value="Chimichurri"> <span>Chimichurri</span></label>
+            </div>
+        </div>
+
+        <div class="seccion">
+            <h3 id="titulo-quesos">Agregado de Queso (Ambos sándwiches)</h3>
+            <p class="desc">Elige el queso</p>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="queso" value="Cheddar"> <span>Cheddar</span></label>
+                <label class="opcion"><input type="checkbox" name="queso" value="Mozzarella"> <span>Mozzarella</span></label>
+                <label class="opcion"><input type="checkbox" name="queso" value="Provoleta"> <span>Provoleta</span></label>
+            </div>
+        </div>
+
+        <div class="seccion seccion-papas-contenedor">
+            <h3>Guarnición de Papas</h3>
+            <p class="desc">¿Cómo prefieres tus papas?</p>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="radio" name="papas_iguales" value="Con sal" checked> <span>Con Sal</span></label>
+                <label class="opcion"><input type="radio" name="papas_iguales" value="Sin sal"> <span>Sin Sal</span></label>
+                <label class="opcion"><input type="radio" name="papas_iguales" value="Sazonado especial"> <span>Sazonado Especial</span></label>
+            </div>
+        </div>
+    </div>
+
+    <!-- BLOQUE: DIFERENTES -->
+    <div id="bloque-diferentes" style="display: none;">
+        <!-- SÁNDWICH 1 -->
+        <div class="seccion">
+            <h3>🥪 Sándwich A</h3>
+            <h4>Vegetales</h4>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="veg_a" value="Sin Zanahoria"> <span>Sin Zanahoria</span></label>
+                <label class="opcion"><input type="checkbox" name="veg_a" value="Sin Morrón"> <span>Sin Morrón</span></label>
+                <label class="opcion"><input type="checkbox" name="veg_a" value="Sin Cebolla"> <span>Sin Cebolla</span></label>
+            </div>
+            <h4>Salsas</h4>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="salsa_a" value="Salsa Porkis"> <span>Salsa Porkis</span></label>
+                <label class="opcion"><input type="checkbox" name="salsa_a" value="Criolla"> <span>Salsa Criolla</span></label>
+                <label class="opcion"><input type="checkbox" name="salsa_a" value="Chimichurri"> <span>Chimichurri</span></label>
+            </div>
+            <h4>Quesos</h4>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="queso_a" value="Cheddar"> <span>Cheddar</span></label>
+                <label class="opcion"><input type="checkbox" name="queso_a" value="Mozzarella"> <span>Mozzarella</span></label>
+                <label class="opcion"><input type="checkbox" name="queso_a" value="Provoleta"> <span>Provoleta</span></label>
+            </div>
+            <div class="seccion-papas-contenedor">
+                <h4>Papas Sándwich A</h4>
+                <div class="grid-opciones dos-columnas">
+                    <label class="opcion"><input type="radio" name="papas_a" value="Con sal" checked> <span>Con Sal</span></label>
+                    <label class="opcion"><input type="radio" name="papas_a" value="Sin sal"> <span>Sin Sal</span></label>
+                    <label class="opcion"><input type="radio" name="papas_a" value="Sazonado especial"> <span>Sazonado Especial</span></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- SÁNDWICH 2 -->
+        <div class="seccion">
+            <h3>🥪 Sándwich B</h3>
+            <h4>Vegetales</h4>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="veg_b" value="Sin Zanahoria"> <span>Sin Zanahoria</span></label>
+                <label class="opcion"><input type="checkbox" name="veg_b" value="Sin Morrón"> <span>Sin Morrón</span></label>
+                <label class="opcion"><input type="checkbox" name="veg_b" value="Sin Cebolla"> <span>Sin Cebolla</span></label>
+            </div>
+            <h4>Salsas</h4>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="salsa_b" value="Salsa Porkis"> <span>Salsa Porkis</span></label>
+                <label class="opcion"><input type="checkbox" name="salsa_b" value="Criolla"> <span>Salsa Criolla</span></label>
+                <label class="opcion"><input type="checkbox" name="salsa_b" value="Chimichurri"> <span>Chimichurri</span></label>
+            </div>
+            <h4>Quesos</h4>
+            <div class="grid-opciones dos-columnas">
+                <label class="opcion"><input type="checkbox" name="queso_b" value="Cheddar"> <span>Cheddar</span></label>
+                <label class="opcion"><input type="checkbox" name="queso_b" value="Mozzarella"> <span>Mozzarella</span></label>
+                <label class="opcion"><input type="checkbox" name="queso_b" value="Provoleta"> <span>Provoleta</span></label>
+            </div>
+            <div class="seccion-papas-contenedor">
+                <h4>Papas Sándwich B</h4>
+                <div class="grid-opciones dos-columnas">
+                    <label class="opcion"><input type="radio" name="papas_b" value="Con sal" checked> <span>Con Sal</span></label>
+                    <label class="opcion"><input type="radio" name="papas_b" value="Sin sal"> <span>Sin Sal</span></label>
+                    <label class="opcion"><input type="radio" name="papas_b" value="Sazonado especial"> <span>Sazonado Especial</span></label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="seccion">
+        <h3>Cantidad</h3>
+        <p class="desc">¿Cuántos ítems iguales a este quieres?</p>
+        <select id="cantidadSandwich">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+    </div>
+
+    <button onclick="agregarAlCarrito(false)" class="btn-secundario">➕ Agregar y armar otro distinto</button>
+    <button onclick="agregarAlCarrito(true)">✅ Finalizar mi pedido</button>
+</div>
+
+<div class="container" id="pantalla-gracias">
+    <div class="header">
+        <h1>¡Casi listo!</h1>
+        <p>Revisa el detalle de tu compra</p>
+    </div>
+    
+    <div class="resumen-caja" id="cajaResumen"></div>
+
+    <a id="btnWhatsappLink" class="btn-whatsapp" href="#" target="_blank" rel="noopener noreferrer">📲 Enviar pedido por WhatsApp</a>
+</div>
+
+<script>
+    let carrito = [];
+
+    function actualizarMenu() {
+        const menuSeleccionado = document.querySelector('input[name="tipoMenu"]:checked').value;
+        const esCombo2x1 = menuSeleccionado.includes("2x1");
+        const llevaPapas = !menuSeleccionado.includes("Sin papas");
+
+        const seccionModo = document.getElementById("seccion-modo-armado");
+        const titVeg = document.getElementById("titulo-veg");
+        const titSalsas = document.getElementById("titulo-salsas");
+        const titQuesos = document.getElementById("titulo-quesos");
+
+        if (esCombo2x1) {
+            seccionModo.style.display = "block";
+            titVeg.innerText = "Vegetales (Ambos sándwiches)";
+            titSalsas.innerText = "Salsas (Ambos sándwiches)";
+            titQuesos.innerText = "Agregado de Queso (Ambos sándwiches)";
+            cambiarModoArmado();
+        } else {
+            seccionModo.style.display = "none";
+            document.getElementById("bloque-iguales").style.display = "block";
+            document.getElementById("bloque-diferentes").style.display = "none";
+            titVeg.innerText = "Vegetales";
+            titSalsas.innerText = "Salsas";
+            titQuesos.innerText = "Agregado de Queso";
+        }
+
+        const contenedoresPapas = document.querySelectorAll('.seccion-papas-contenedor');
+        contenedoresPapas.forEach(el => {
+            el.style.display = llevaPapas ? "block" : "none";
+        });
+    }
+
+    function cambiarModoArmado() {
+        const menuSeleccionado = document.querySelector('input[name="tipoMenu"]:checked').value;
+        if (!menuSeleccionado.includes("2x1")) return;
+
+        const modo = document.querySelector('input[name="modoArmado"]:checked').value;
+        if(modo === 'diferentes') {
+            document.getElementById("bloque-iguales").style.display = "none";
+            document.getElementById("bloque-diferentes").style.display = "block";
+        } else {
+            document.getElementById("bloque-iguales").style.display = "block";
+            document.getElementById("bloque-diferentes").style.display = "none";
+        }
+    }
+
+    function obtenerValoresSeleccionados(selector) {
+        let items = Array.from(document.querySelectorAll(selector + ':checked')).map(e => e.value);
+        return items.length > 0 ? items.join(", ") : "Ninguno/Completo";
+    }
+
+    function agregarAlCarrito(esFinalizar) {
+        const nombre = document.getElementById("nombreCliente").value;
+        const direccion = document.getElementById("direccionCliente").value;
+
+        if(nombre.trim() === "" || direccion.trim() === "") {
+            alert("Por favor, ingresa tu nombre y dirección en la primera sección.");
+            document.getElementById("nombreCliente").focus();
+            return;
+        }
+
+        const menuSeleccionado = document.querySelector('input[name="tipoMenu"]:checked');
+        const tipoMenu = menuSeleccionado.value;
+        const precio = parseInt(menuSeleccionado.getAttribute('data-precio'));
+        const esCombo2x1 = tipoMenu.includes("2x1");
+        const cantidad = parseInt(document.getElementById("cantidadSandwich").value) || 1;
+        const llevaPapas = !tipoMenu.includes("Sin papas");
+
+        let detalleSandwiches = {};
+
+        if (!esCombo2x1) {
+            const veg = obtenerValoresSeleccionados('input[name="veg"]');
+            const salsas = obtenerValoresSeleccionados('input[name="salsa"]');
+            const quesos = obtenerValoresSeleccionados('input[name="queso"]');
+            const papas = llevaPapas ? document.querySelector('input[name="papas_iguales"]:checked').value : "Sin papas";
+
+            detalleSandwiches = {
+                modo: 'Individual',
+                desc: `Sándwich Individual:\n  • Veg: ${veg}\n  • Salsas: ${salsas}\n  • Quesos: ${quesos}` + (llevaPapas ? `\n  • Papas: ${papas}` : '')
+            };
+        } else {
+            const modoArmado = document.querySelector('input[name="modoArmado"]:checked').value;
+
+            if (modoArmado === 'iguales') {
+                const veg = obtenerValoresSeleccionados('input[name="veg"]');
+                const salsas = obtenerValoresSeleccionados('input[name="salsa"]');
+                const quesos = obtenerValoresSeleccionados('input[name="queso"]');
+                const papas = llevaPapas ? document.querySelector('input[name="papas_iguales"]:checked').value : "Sin papas";
+                
+                detalleSandwiches = {
+                    modo: 'Iguales',
+                    desc: `2 Sándwiches iguales:\n  • Veg: ${veg}\n  • Salsas: ${salsas}\n  • Quesos: ${quesos}` + (llevaPapas ? `\n  • Papas (Ambos): ${papas}` : '')
+                };
+            } else {
+                const vegA = obtenerValoresSeleccionados('input[name="veg_a"]');
+                const salsasA = obtenerValoresSeleccionados('input[name="salsa_a"]');
+                const quesosA = obtenerValoresSeleccionados('input[name="queso_a"]');
+                const papasA = llevaPapas ? document.querySelector('input[name="papas_a"]:checked').value : "Sin papas";
+
+                const vegB = obtenerValoresSeleccionados('input[name="veg_b"]');
+                const salsasB = obtenerValoresSeleccionados('input[name="salsa_b"]');
+                const quesosB = obtenerValoresSeleccionados('input[name="queso_b"]');
+                const papasB = llevaPapas ? document.querySelector('input[name="papas_b"]:checked').value : "Sin papas";
+
+                detalleSandwiches = {
+                    modo: 'Diferentes',
+                    desc: `Sándwich A:\n  • Veg: ${vegA}\n  • Salsas: ${salsasA}\n  • Quesos: ${quesosA}` + (llevaPapas ? `\n  • Papas A: ${papasA}` : '') +
+                          `\nSándwich B:\n  • Veg: ${vegB}\n  • Salsas: ${salsasB}\n  • Quesos: ${quesosB}` + (llevaPapas ? `\n  • Papas B: ${papasB}` : '')
+                };
+            }
+        }
+
+        carrito.push({ tipoMenu, precio, detalleSandwiches, cantidad });
+
+        if (esFinalizar) {
+            procesarPedidoFinal(nombre, direccion);
+        } else {
+            const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+            document.getElementById("contador-carrito").style.display = "block";
+            document.getElementById("contador-carrito").innerText = `🛒 Tienes ${totalItems} ítem(s) cargado(s). Puedes armar otro.`;
+            
+            // Limpiar selección
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById("cantidadSandwich").value = "1";
+            document.querySelector('input[name="tipoMenu"][value="2x1 Con papas"]').checked = true;
+            document.querySelector('input[name="modoArmado"][value="iguales"]').checked = true;
+            actualizarMenu();
+            document.getElementById("seccion-cliente").style.display = "none";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function procesarPedidoFinal(nombre, direccion) {
+        const localidadSelect = document.getElementById("localidadEnvio");
+        const costoEnvio = parseInt(localidadSelect.value);
+        const nombreLocalidad = localidadSelect.options[localidadSelect.selectedIndex].getAttribute("data-nombre");
+
+        let total = 0;
+        let htmlResumen = `<strong>👤 Cliente:</strong> ${nombre}<br><strong>📍 Entrega:</strong> ${direccion} (${nombreLocalidad})<br><br>`;
+        let mensajeTexto = `*¡Hola Pork & Beef! Te paso mi pedido:* 🍔🔥\n\n`;
+        mensajeTexto += `👤 *Cliente:* ${nombre}\n`;
+        mensajeTexto += `📍 *Dirección:* ${direccion} (${nombreLocalidad})\n`;
+        mensajeTexto += `-----------------------------------\n\n`;
+
+        let resumenExcel = [];
+
+        carrito.forEach((item, index) => {
+            let subtotal = item.precio * item.cantidad;
+            total += subtotal;
+
+            resumenExcel.push(`[Ítem #${index+1} (${item.tipoMenu}) x${item.cantidad}: ${item.detalleSandwiches.desc.replace(/\n/g, " | ")}]`);
+
+            htmlResumen += `
+                <details class="acordeon-pedido" open>
+                    <summary>Ítem #${index + 1} (x${item.cantidad}) - $${subtotal}</summary>
+                    <div class="acordeon-detalle">
+                        <strong>Tipo:</strong> ${item.tipoMenu}<br>
+                        <pre style="font-family: inherit; margin: 5px 0;">${item.detalleSandwiches.desc}</pre>
+                    </div>
+                </details>
+            `;
+
+            mensajeTexto += `🛒 *ÍTEM #${index + 1}* (x${item.cantidad})\n`;
+            mensajeTexto += `📌 *Tipo:* ${item.tipoMenu}\n`;
+            mensajeTexto += `${item.detalleSandwiches.desc}\n`;
+            mensajeTexto += `💵 *Subtotal:* $${subtotal}\n\n`;
+        });
+
+        total += costoEnvio;
+
+        htmlResumen += `<div style="text-align: right; color: #a0a0a0; margin-top: 20px;">Subtotal productos: $${total - costoEnvio}<br>Envío (${nombreLocalidad}): $${costoEnvio}</div>`;
+        htmlResumen += `<div class="total-destacado">TOTAL A PAGAR: $${total}</div>`;
+        
+        mensajeTexto += `-----------------------------------\n`;
+        mensajeTexto += `🚚 *Envío a ${nombreLocalidad}:* $${costoEnvio}\n`;
+        mensajeTexto += `💰 *TOTAL A PAGAR: $${total}*\n\n`;
+        mensajeTexto += `¿Me comparten los datos bancarios para realizar la transferencia? ¡Gracias!`;
+
+        // URL de tu Google Apps Script
+        const urlScript = "https://script.google.com/macros/s/AKfycbw-Z44SDZTsHFdt9W07pTcn7WiOImW84ZmEqG_sIl1BFPU5LrwV43fEfLxBzDmSph1GDw/exec";
+        const params = new URLSearchParams();
+        params.append("Fecha", new Date().toLocaleString());
+        params.append("Nombre", nombre);
+        params.append("Direccion", `${direccion} (${nombreLocalidad})`);
+        params.append("Pedido", resumenExcel.join("\n"));
+        params.append("Total", `$${total}`);
+        
+        fetch(urlScript, { method: "POST", body: params, mode: "no-cors" }).catch(e => console.error(e));
+
+        document.getElementById("cajaResumen").innerHTML = htmlResumen;
+        
+        const linkWhatsApp = `https://api.whatsapp.com/send?phone=5491123125597&text=${encodeURIComponent(mensajeTexto)}`;
+        document.getElementById("btnWhatsappLink").setAttribute("href", linkWhatsApp);
+
+        document.getElementById("pantalla-pedido").style.display = "none";
+        const pantallaGracias = document.getElementById("pantalla-gracias");
+        pantallaGracias.style.display = "block";
+        pantallaGracias.classList.add("animar");
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>
